@@ -7,6 +7,7 @@
             <BaseInput
                 v-model="model.name.value"
                 :validators="model.name.validators"
+                @update-is-valid="updateIsValid"
                 label="Name"
                 class="form-control"
                 type="text"
@@ -17,6 +18,7 @@
             <BaseInput
                 v-model="model.email.value"
                 :validators="model.email.validators"
+                @update-is-valid="updateIsValid"
                 label="Email"
                 class="form-control"
                 type="text"
@@ -27,6 +29,7 @@
             <BaseInput
                 v-model="model.password.value"
                 :validators="model.password.validators"
+                @update-is-valid="updateIsValid"
                 label="Password"
                 class="form-control"
                 type="password"
@@ -37,13 +40,19 @@
             <BaseInput
                 v-model="model.age.value"
                 :validators="model.age.validators"
+                @update-is-valid="updateIsValid"
                 label="Age"
                 class="form-control"
                 type="number"
             ></BaseInput>
         </div>
 
-        <button class="btn btn-success">Submit</button>
+        <button
+            :disabled="!formIsValid"
+            class="btn btn-success"
+        >
+            Submit
+        </button>
     </form>
 
     <p>
@@ -55,10 +64,11 @@
     import BaseInput from "@/components/forms/BaseInput.vue";
     import FormInput from "@/models/FormInput";
     import Validators from "@/models/BaseValidators";
+    import { defineComponent } from "vue";
 
-    export default {
+    export default defineComponent({
         components: { BaseInput },
-        data() {
+        data: () => {
             return {
                 categories: ["cat-1", "cat-2", "cat-3", "cat-4", "cat-5"],
                 model: {
@@ -75,10 +85,7 @@
                         Validators.minLength(6),
                         Validators.maxLength(18)
                     ]),
-                    age: new FormInput("age", [
-                        Validators.minNumber(5),
-                        Validators.maxNumber(10)
-                    ])
+                    age: new FormInput("age", [Validators.maxNumber(10)])
                 } as {
                     name: FormInput;
                     email: FormInput;
@@ -86,8 +93,26 @@
                     age: FormInput;
                 }
             };
+        },
+        computed: {
+            formIsValid(): boolean {
+                const inputs = Object.values(this.model) as Array<FormInput>;
+                return inputs.every((x) => x.isValid);
+            }
+        },
+        methods: {
+            updateIsValid(emitted: { name: string; value: boolean }) {
+                const inputs = Object.values(this.model) as Array<FormInput>;
+                const input = inputs.find(
+                    (x) => x.propertyName == emitted.name.toLocaleLowerCase()
+                );
+
+                if (input) {
+                    input.isValid = emitted.value;
+                }
+            }
         }
-    };
+    });
 </script>
 
 <style></style>

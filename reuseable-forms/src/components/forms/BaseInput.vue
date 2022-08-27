@@ -45,7 +45,7 @@
                 default: ""
             },
             modelValue: {
-                type: [String, Number],
+                type: [String],
                 required: true
             },
             validators: {
@@ -63,31 +63,49 @@
             }
         },
         methods: {
-            getValidationResult(value: string): boolean {
-                let result = true;
+            isValid(value: string): boolean {
+                return this.validators?.every((x) => x.validate(value).isValid);
+            },
+            populateErrors(value: string): void {
                 this.errors = [];
 
                 for (const validator of this.validators) {
                     const validationResult = validator.validate(value);
 
-                    result = result && validationResult.isValid;
-
                     if (!validationResult.isValid) {
                         this.errors.push(validationResult.errorMessage);
                     }
                 }
-
-                return result;
             },
             onInput(value: string): void {
-                this.getValidationResult(value);
+                const isValid = this.isValid(value);
+                this.populateErrors(value);
+                this.$emit("updateIsValid", {
+                    name: this.label,
+                    value: isValid
+                });
                 this.$emit("update:modelValue", value);
             },
             onBlur(value: string): void {
-                this.getValidationResult(value);
+                const isValid = this.isValid(value);
+                this.populateErrors(value);
+                this.$emit("updateIsValid", {
+                    name: this.label,
+                    value: isValid
+                });
             }
         },
-        emits: { "update:modelValue": null }
+        emits: {
+            "update:modelValue": null,
+            updateIsValid: null
+        },
+        beforeMount() {
+            const isValid = this.isValid(this.modelValue);
+            this.$emit("updateIsValid", {
+                name: this.label,
+                value: isValid
+            });
+        }
     });
 </script>
 
