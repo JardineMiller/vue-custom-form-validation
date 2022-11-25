@@ -4,10 +4,15 @@ export default class FormInput {
     isValid: boolean = true;
     propertyName: string;
     validators: Array<Validator>;
-    value: string = "";
+    value: string | undefined;
 
-    constructor(propertyName: string, validators: Array<Validator> = []) {
+    constructor(
+        propertyName: string,
+        validators: Array<Validator> = [],
+        initialValue: string | undefined = undefined
+    ) {
         this.propertyName = propertyName;
         this.validators = validators;
+        this.value = initialValue;
     }
 }
